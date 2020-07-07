@@ -143,6 +143,10 @@ typedef void (^YTPlaybackQualityCompletionHandler)(YTPlaybackQuality result,
 
 @end
 
+@interface ModifySafeAreaWKWebView : WKWebView
+@property(nonatomic) UIEdgeInsets mutableSafeAreaInset;
+@end
+
 /**
  * YTPlayerView is a custom UIView that client developers will use to include YouTube
  * videos in their iOS applications. It can be instantiated programmatically, or via
@@ -152,7 +156,7 @@ typedef void (^YTPlaybackQualityCompletionHandler)(YTPlaybackQuality result,
  */
 @interface YTPlayerView : UIView
 
-@property(nonatomic, nullable, readonly) WKWebView *webView;
+@property(nonatomic, nullable, readonly) ModifySafeAreaWKWebView *webView;
 
 /** A delegate to be notified on playback events. */
 @property(nonatomic, weak, nullable) id<YTPlayerViewDelegate> delegate;
@@ -646,5 +650,9 @@ typedef void (^YTPlaybackQualityCompletionHandler)(YTPlaybackQuality result,
  * Intended to use for testing, should not be used in production code.
  */
 - (void)removeWebView;
+
+#pragma mark - Safe Area
+
+- (void)mutableSafeArea: (UIEdgeInsets)inset;
 
 @end

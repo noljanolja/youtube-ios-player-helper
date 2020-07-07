@@ -62,6 +62,16 @@ NSString static *const kYTPlayerOAuthRegexPattern = @"^http(s)://accounts.google
 NSString static *const kYTPlayerStaticProxyRegexPattern = @"^https://content.googleapis.com/static/proxy.html(.*)$";
 NSString static *const kYTPlayerSyndicationRegexPattern = @"^https://tpc.googlesyndication.com/sodar/(.*).html$";
 
+#pragma mark - ModifySafeAreaWKWebView
+
+@implementation ModifySafeAreaWKWebView
+
+- (UIEdgeInsets)safeAreaInsets {
+    return _mutableSafeAreaInset;
+}
+
+@end
+
 @interface YTPlayerView() <WKNavigationDelegate>
 
 @property (nonatomic) NSURL *originURL;
@@ -886,16 +896,16 @@ decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
 
 #pragma mark - Exposed for Testing
 
-- (void)setWebView:(WKWebView *)webView {
+- (void)setWebView:(ModifySafeAreaWKWebView *)webView {
   _webView = webView;
 }
 
-- (WKWebView *)createNewWebView {
+- (ModifySafeAreaWKWebView *)createNewWebView {
   WKWebViewConfiguration *webViewConfiguration = [[WKWebViewConfiguration alloc] init];
   webViewConfiguration.allowsInlineMediaPlayback = YES;
   webViewConfiguration.mediaTypesRequiringUserActionForPlayback = WKAudiovisualMediaTypeNone;
-  WKWebView *webView = [[WKWebView alloc] initWithFrame:self.bounds
-                                          configuration:webViewConfiguration];
+  ModifySafeAreaWKWebView *webView = [[ModifySafeAreaWKWebView alloc] initWithFrame:self.bounds
+                                                                      configuration:webViewConfiguration];
   webView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
   webView.scrollView.scrollEnabled = NO;
   webView.scrollView.bounces = NO;
@@ -923,6 +933,12 @@ decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
         frameworkBundle = [NSBundle bundleWithPath:frameworkBundlePath];
     });
     return frameworkBundle;
+}
+
+#pragma mark - Safe Area
+
+- (void)mutableSafeArea: (UIEdgeInsets)inset {
+    _webView.mutableSafeAreaInset = inset;
 }
 
 @end

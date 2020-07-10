@@ -490,20 +490,11 @@ NSString static *const kYTPlayerSyndicationRegexPattern = @"^https://tpc.googles
  }]
  */
 - (void)captionTracks:(_Nullable YTArrayCompletionHandler)completionHandler {
-    [self usableOptions:nil optionName:nil values:nil valueString:nil addingFunctions:nil completionHandler:^(NSArray * _Nullable options, NSError * _Nullable error) {
-        if ([options count] > 0) {
-            NSUInteger index = [options indexOfObjectWithOptions:(NSEnumerationConcurrent) passingTest:^BOOL(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                return ([(NSString *)obj rangeOfString: @"captions"].location != NSNotFound || [(NSString *)obj rangeOfString: @"cc"].location != NSNotFound);
-            }];
-            if (index == NSNotFound) {
-                completionHandler(nil, [NSError errorWithDomain:@"com.youtube.youtube-ios-player-helper" code:-30 userInfo: [NSDictionary dictionaryWithObject:@"message" forKey:@"not found caption modules."]]);
-            } else {
-                // [reload, fontSize, track, tracklist, translationLanguages, sampleSubtitle]
-                [self usableOptions:(NSString *)options[index] optionName:@"tracklist" values:nil valueString:nil addingFunctions:nil completionHandler:^(NSArray * _Nullable languages, NSError * _Nullable error) {
-                    completionHandler(languages, error);
-                }];
-            }
-        }
+    [self captionModule:^(NSString * _Nullable name, NSError * _Nullable error) {
+        // [reload, fontSize, track, tracklist, translationLanguages, sampleSubtitle]
+        [self usableOptions:name optionName:@"tracklist" values:nil valueString:nil addingFunctions:nil completionHandler:^(NSArray * _Nullable languages, NSError * _Nullable error) {
+            completionHandler(languages, error);
+        }];
     }];
 }
 

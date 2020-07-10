@@ -415,6 +415,142 @@ NSString static *const kYTPlayerSyndicationRegexPattern = @"^https://tpc.googles
   }];
 }
 
+- (void)usableOptions:(NSString * _Nullable)moduleName
+           optionName:(NSString * _Nullable)name
+               values:(NSDictionary * _Nullable)values
+          valueString:(NSString * _Nullable)jsonString
+      addingFunctions:(NSString * _Nullable)function
+    completionHandler:(_Nullable YTArrayCompletionHandler)completionHandler {
+    
+    NSString *functionName = @"player.getOptions();";
+    if (moduleName != nil && ![moduleName isEqualToString:@""]) {
+        if (name != nil && ![name isEqualToString:@""]) {
+            if (jsonString != nil && ![jsonString isEqualToString: @""]) {
+                functionName = [NSString stringWithFormat: @"player.getOption(\"%@\", \"%@\", %@);", moduleName, name, jsonString];
+            } else if (values != nil && values.allKeys.count > 0) {
+
+                NSError *jsonRenderingError = nil;
+                NSData *jsonData = [NSJSONSerialization dataWithJSONObject: values
+                                                                   options:NSJSONWritingPrettyPrinted
+                                                                     error: &jsonRenderingError];
+                if (jsonRenderingError) {
+                    completionHandler(nil, jsonRenderingError);
+                    return;
+                } else {
+                    NSString *jsonString = [[NSString alloc] initWithData: jsonData encoding:NSUTF8StringEncoding];
+                    functionName = [NSString stringWithFormat: @"player.getOption(\"%@\", \"%@\", %@);", moduleName, name, jsonString];
+                }
+            } else {
+                functionName = [NSString stringWithFormat: @"player.getOption(\"%@\", \"%@\");", moduleName, name];
+            }
+        } else {
+            functionName = [NSString stringWithFormat: @"player.getOptions(\"%@\");", moduleName];
+        }
+    }
+    
+    if (function != nil && ![function isEqualToString: @""]) {
+        if (moduleName != nil && ![moduleName isEqualToString: @""]) {
+            functionName = [NSString stringWithFormat: @"%@ %@", functionName, function];
+        } else {
+            functionName = function;
+        }
+    }
+    
+    [self evaluateJavaScript:functionName
+           completionHandler:^(id  _Nullable result, NSError * _Nullable error) {
+        if (!completionHandler) {
+            return;
+        }
+        if (error) {
+            completionHandler(nil, error);
+            return;
+        }
+        if (!result || ![result isKindOfClass:[NSArray class]]) {
+            completionHandler(nil, nil);
+            return;
+        }
+        completionHandler(result, nil);
+    }];
+}
+
+#pragma mark - Captions
+
+/*
+ [{
+     displayName = Spanish;
+     id = "<null>";
+     "is_default" = 0;
+     "is_servable" = 0;
+     "is_translateable" = 1;
+     kind = "";
+     languageCode = es;
+     languageName = Spanish;
+     name = "<null>";
+     "vss_id" = ".es";
+ }]
+ */
+- (void)captionTracks:(_Nullable YTArrayCompletionHandler)completionHandler {
+    [self usableOptions:nil optionName:nil values:nil valueString:nil addingFunctions:nil completionHandler:^(NSArray * _Nullable options, NSError * _Nullable error) {
+        if ([options count] > 0) {
+            NSUInteger index = [options indexOfObjectWithOptions:(NSEnumerationConcurrent) passingTest:^BOOL(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                return ([(NSString *)obj rangeOfString: @"captions"].location != NSNotFound || [(NSString *)obj rangeOfString: @"cc"].location != NSNotFound);
+            }];
+            if (index == NSNotFound) {
+                completionHandler(nil, [NSError errorWithDomain:@"com.youtube.youtube-ios-player-helper" code:-30 userInfo: [NSDictionary dictionaryWithObject:@"message" forKey:@"not found caption modules."]]);
+            } else {
+                // [reload, fontSize, track, tracklist, translationLanguages, sampleSubtitle]
+                [self usableOptions:(NSString *)options[index] optionName:@"tracklist" values:nil valueString:nil addingFunctions:nil completionHandler:^(NSArray * _Nullable languages, NSError * _Nullable error) {
+                    completionHandler(languages, error);
+                }];
+            }
+        }
+    }];
+}
+
+- (void)captionModule:(_Nullable YTStringCompletionHandler)completionHandler {
+    [self usableOptions:nil optionName:nil values:nil valueString:nil addingFunctions:nil completionHandler:^(NSArray * _Nullable options, NSError * _Nullable error) {
+        if ([options count] > 0) {
+            NSUInteger index = [options indexOfObjectWithOptions:(NSEnumerationConcurrent) passingTest:^BOOL(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                return ([(NSString *)obj rangeOfString: @"captions"].location != NSNotFound || [(NSString *)obj rangeOfString: @"cc"].location != NSNotFound);
+            }];
+            if (index == NSNotFound) {
+                completionHandler(nil, [NSError errorWithDomain:@"com.youtube.youtube-ios-player-helper" code:-30 userInfo: [NSDictionary dictionaryWithObject:@"message" forKey:@"not found caption modules."]]);
+            } else {
+                completionHandler((NSString *)options[index], nil);
+            }
+        }
+    }];
+}
+
+- (void)captions:(BOOL)isTurnOn language:(NSString * _Nonnull)language completion:(nullable void (^)(id _Nullable result, NSError * _Nullable error))completionHandler {
+    [self captionModule:^(NSString * _Nullable result, NSError * _Nullable error) {
+        if (error) {
+            if (completionHandler) {
+                completionHandler(nil, error);
+            }
+        } else if (result != nil && ![result isEqualToString:@""]) {
+            NSString *functionName = nil;
+            if (isTurnOn) {
+                functionName = [NSString stringWithFormat:@"player.setOption(\"%@\", \"track\", {\"languageCode\": \"%@\"}); player.loadModule(\"%@\");", result, language, result];
+            } else {
+                functionName = [NSString stringWithFormat:@"player.unloadModule(\"%@\");", result];
+            }
+            if (functionName != nil) {
+                [self evaluateJavaScript:functionName completionHandler:^(id _Nullable result, NSError * _Nullable error) {
+                    if (completionHandler) {
+                        completionHandler(result, error);
+                    }
+                }];
+            }
+        } else {
+            if (completionHandler) {
+                completionHandler(nil, [NSError errorWithDomain:@"com.youtube.youtube-ios-player-helper" code:-30 userInfo: [NSDictionary dictionaryWithObject:@"message" forKey:@"not found caption modules."]]);
+            }
+        }
+    }];
+}
+
+
 #pragma mark - Playlist methods
 
 - (void)playlist:(_Nullable YTArrayCompletionHandler)completionHandler {

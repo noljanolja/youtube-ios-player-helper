@@ -655,4 +655,9 @@ typedef void (^YTPlaybackQualityCompletionHandler)(YTPlaybackQuality result,
 
 - (void)mutableSafeArea: (UIEdgeInsets)inset;
 
+#pragma mark - Captions
+
+- (void)captionTracks:(_Nullable YTArrayCompletionHandler)completionHandler;
+- (void)captions:(BOOL)isTurnOn language:(NSString * _Nonnull)language completion:(nullable void (^)(id _Nullable result, NSError * _Nullable error))completionHandler;
+
 @end

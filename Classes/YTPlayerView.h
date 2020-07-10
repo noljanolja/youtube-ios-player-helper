@@ -658,6 +658,7 @@ typedef void (^YTPlaybackQualityCompletionHandler)(YTPlaybackQuality result,
 #pragma mark - Captions
 
 - (void)captionTracks:(_Nullable YTArrayCompletionHandler)completionHandler;
+- (void)captionSelcted:(nullable void (^)(NSDictionary * _Nullable result, NSError * _Nullable error))completionHandler;
 - (void)captions:(BOOL)isTurnOn language:(NSString * _Nonnull)language completion:(nullable void (^)(id _Nullable result, NSError * _Nullable error))completionHandler;
 
 @end

@@ -466,7 +466,11 @@ NSString static *const kYTPlayerSyndicationRegexPattern = @"^https://tpc.googles
             return;
         }
         if (!result || ![result isKindOfClass:[NSArray class]]) {
-            completionHandler(nil, nil);
+            if ([result isKindOfClass:[NSDictionary class]]) {
+                completionHandler([NSArray arrayWithObject:(NSDictionary *)result], nil);
+            } else {
+                completionHandler(nil, nil);
+            }
             return;
         }
         completionHandler(result, nil);
@@ -494,6 +498,14 @@ NSString static *const kYTPlayerSyndicationRegexPattern = @"^https://tpc.googles
         // [reload, fontSize, track, tracklist, translationLanguages, sampleSubtitle]
         [self usableOptions:name optionName:@"tracklist" values:nil valueString:nil addingFunctions:nil completionHandler:^(NSArray * _Nullable languages, NSError * _Nullable error) {
             completionHandler(languages, error);
+        }];
+    }];
+}
+
+- (void)captionSelcted:(nullable void (^)(NSDictionary * _Nullable result, NSError * _Nullable error))completionHandler {
+    [self captionModule:^(NSString * _Nullable name, NSError * _Nullable error) {
+        [self usableOptions:name optionName:@"track" values:nil valueString:nil addingFunctions:nil completionHandler:^(NSArray * _Nullable result, NSError * _Nullable error) {
+            completionHandler((NSDictionary *)[result firstObject], error);
         }];
     }];
 }

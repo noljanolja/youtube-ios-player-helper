@@ -553,6 +553,25 @@ NSString static *const kYTPlayerSyndicationRegexPattern = @"^https://tpc.googles
     }];
 }
 
+- (void)captionSize:(NSInteger)size completion:(_Nullable YTStringCompletionHandler)completionHandler {
+    [self captionModule:^(NSString * _Nullable name, NSError * _Nullable error) {
+        NSString *function = [NSString stringWithFormat:@"player.setOption(\"%@\", \"fontSize\", %ld);", name, (long)size];
+        [self evaluateJavaScript:function completionHandler:^(id  _Nullable result, NSError * _Nullable error) {
+            if (!completionHandler) {
+              return;
+            }
+            if (error) {
+              completionHandler(nil, error);
+              return;
+            }
+            if (!result || ![result isKindOfClass:[NSString class]]) {
+              completionHandler(nil, nil);
+              return;
+            }
+            completionHandler(result, nil);
+        }];
+    }];
+}
 
 #pragma mark - Playlist methods
 

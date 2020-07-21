@@ -1093,6 +1093,12 @@ decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
     return frameworkBundle;
 }
 
+#pragma mark - Ad
+
+- (void)clearAdvertise {
+    [self evaluateJavaScript:[NSString stringWithFormat:@"clear();"]];
+}
+
 #pragma mark - Safe Area
 
 - (void)mutableSafeArea: (UIEdgeInsets)inset {

@@ -792,6 +792,8 @@ decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
   // to load it in a browser.
   if ([[url.host lowercaseString] isEqualToString:[self.originURL.host lowercaseString]]) {
     return YES;
+  } else if ([[[url.path stringByReplacingOccurrencesOfString:@"/" withString:@""] lowercaseString] isEqualToString:@"ytscframe"]) {
+    return NO;
   }
   // Usually this means the user has clicked on the YouTube logo or an error message in the
   // player. Most URLs should open in the browser. The only http(s) URL that should open in this

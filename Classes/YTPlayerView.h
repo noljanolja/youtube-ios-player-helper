@@ -141,6 +141,13 @@ typedef void (^YTPlaybackQualityCompletionHandler)(YTPlaybackQuality result,
  */
 - (nullable UIView *)playerViewPreferredInitialLoadingView:(nonnull YTPlayerView *)playerView;
 
+/**
+ * Picture in picture state delegate.
+ * enable: picture-in-picture
+ * disable: inline or etc, ...
+ */
+- (void)playerView:(nonnull YTPlayerView *)playerView didChangeToStatePictureInPicture:(NSString * _Nullable)state;
+
 @end
 
 @interface ModifySafeAreaWKWebView : WKWebView
@@ -665,5 +672,12 @@ typedef void (^YTPlaybackQualityCompletionHandler)(YTPlaybackQuality result,
 #pragma mark - Ad
 
 - (void)clearAdvertise;
+
+#pragma mark - Picture in Picture
+
+- (void)requestPictureInPictureState:(_Nullable YTStringCompletionHandler)completionHandler;
+- (void)pictureInPicture;
+- (void)requestPictureInPicture;
+- (void)releasePictureInPicture;
 
 @end

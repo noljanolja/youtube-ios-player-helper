@@ -129,10 +129,7 @@
     function clickPictureInPicture() {
         const video = document.getElementById('player').contentDocument.querySelector('video');
         const mode = video.webkitPresentationMode;
-        if (mode == "picture-in-picture") {
-            clearInterval(timerId);
-            window.location.href = 'ytplayer://onPictureInPicrueState?data=inline';
-        } else {
+        if (mode != "picture-in-picture") {
             timerId = setInterval(function () {
                 pictureInPictureState();
             }, 1000);

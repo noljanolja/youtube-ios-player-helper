@@ -6,9 +6,13 @@
 Added features:
 - Subtitle ON/OFF and language setting, subtitle size adjustment.
 - Provides Picture In Pictrue function.
-- ytscframe error correction.
+- `ytscframe` error correction.
 
-Note: The subtitles and PiP functions work after all the videos have been loaded. You should observe the point in time through observer to make the desired function work.
+Note: 
+The subtitles and PiP functions work after all the videos have been loaded. You should observe the point in time through observer to make the desired function work.
+And you need to enter an appropriate value in the video load option. For example:
+- PiP: Set the values of `playsinline`, `enablejsapi`, and `picture-in-picture` to true.
+- Subtitles: After setting the values of `enablejsapi` and `cc_load_policy` to true, set the language values in `cc_lang_pref` and `hl`.
 
 ## Usage
 

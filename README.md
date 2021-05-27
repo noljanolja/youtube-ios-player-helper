@@ -8,6 +8,8 @@ Added features:
 - Provides Picture In Pictrue function.
 - ytscframe error correction.
 
+Note: The subtitles and PiP functions work after all the videos have been loaded. You should observe the point in time through observer to make the desired function work.
+
 ## Usage
 
 To run the example project; clone the repo, and run `pod install` from the Project directory first.  For a simple tutorial see this Google Developers article - [Using the YouTube Helper Library to embed YouTube videos in your iOS application](https://developers.google.com/youtube/v3/guides/ios_youtube_helper).

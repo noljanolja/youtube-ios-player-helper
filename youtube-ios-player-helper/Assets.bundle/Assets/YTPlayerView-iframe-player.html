@@ -53,7 +53,10 @@
     var pipButton = document.getElementById('pipButton');
     var isRunningPictrueInPictrue = false;
     var timerId = 0;
+    var timePIPId = 0;
+    var eventCode = -1;
     var error = false;
+    
     
     // Ad clear. call 'clear();'
     const clear = (() => {
@@ -89,7 +92,6 @@
         clear();
         
         window.setInterval(getCurrentTime, 500);
-             
     });
 
     function onReady(event) {
@@ -98,7 +100,17 @@
 
     function onStateChange(event) {
         if (!error) {
+            eventCode = event.data
             window.location.href = 'ytplayer://onStateChange?data=' + event.data;
+           //const video = document.getElementById('player').contentDocument.querySelector('video');
+           //const mode = video.webkitPresentationMode;
+           //if (event.data == 2 && mode == 'picture-in-picture') {
+           //    timePIPId = setInterval(function () {
+           //        isRunningPictrueInPictrue = false;
+           //        clearInterval(timeId);
+           //    }, 500);
+           //    video.webkitSetPresentationMode("inline");
+           //}
         }
         else {
             error = false;
@@ -119,16 +131,17 @@
     window.onresize = function() {
         player.setSize(window.innerWidth, window.innerHeight);
     }
-    
+
     function prepareForPIP() {
         pipButton.addEventListener("click", function(event) {
             clickPictureInPicture();
         });
     }
-    
+
     function clickPictureInPicture() {
         const video = document.getElementById('player').contentDocument.querySelector('video');
         const mode = video.webkitPresentationMode;
+
         if (mode != "picture-in-picture") {
             timerId = setInterval(function () {
                 pictureInPictureState();
@@ -141,17 +154,17 @@
         const video = document.getElementById('player').contentDocument.querySelector('video');
         const mode = video.webkitPresentationMode;
         const nMode = mode === "picture-in-picture" ? true : false;
+        const isLeave = eventCode == 2 ? "leave" : ""
         if (mode === "inline" && isRunningPictrueInPictrue === true) {
             isRunningPictrueInPictrue = false;
             clearInterval(timerId);
-            window.location.href = 'ytplayer://onPictureInPicrueState?data=inline';            
+            window.location.href = 'ytplayer://onPictureInPicrueState?data=inline' + isLeave;
         } else if (nMode != isRunningPictrueInPictrue) {
             isRunningPictrueInPictrue = nMode;
             window.location.href = 'ytplayer://onPictureInPicrueState?data=' + mode;
         }
         // return mode
     }
-    
     </script>
 </body>
 </html>
